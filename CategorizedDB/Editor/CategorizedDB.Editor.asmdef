@@ -1,0 +1,16 @@
+{
+    "name": "CategorizedDB.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4b351739effd5b3469244699540adccb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
