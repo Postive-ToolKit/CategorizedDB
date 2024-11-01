@@ -1,0 +1,7 @@
+{
+  "name": "com.github.postive.simple-dialog-asset-manager",
+  "description": "SDAM provides a simple way to manage your dialog assets in Unity.",
+  "version": "0.3.1",
+  "unity": "2019.3",
+  "displayName": "Simple Dialog Asset Manager"
+}

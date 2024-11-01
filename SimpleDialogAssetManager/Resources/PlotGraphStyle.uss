@@ -1,0 +1,25 @@
+GridBackground {
+    --grid-background-color: rgb(40, 40, 40);
+    --line-color: rgba(192, 192, 192, 0.05);
+    --thick-line-color: rgba(192, 192, 192, 0.08);
+    --spacing: 15;
+}
+
+.panel-header {
+    margin-left: 0;
+    padding-left: 10px;
+}
+
+#unity-text-input {
+    background-color: rgb(32, 32, 32);
+    padding-top: 3px;
+    padding-right: 3px;
+    padding-bottom: 3px;
+    padding-left: 3px;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    -unity-text-align: middle-left;
+    color: rgb(196, 196, 196);
+}
