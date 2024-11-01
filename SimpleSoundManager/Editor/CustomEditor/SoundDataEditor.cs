@@ -3,7 +3,7 @@ using Postive.SimpleSoundAssetManager.Runtime.Data;
 using UnityEditor;
 using UnityEngine;
 
-namespace Postive.SimpleSoundManager.Editor.CustomEditor.PropertyDrawers
+namespace Postive.SimpleSoundManager.Editor.CustomEditor
 {
     [UnityEditor.CustomEditor(typeof(SoundData))]
     public class SoundDataEditor : CategoryScriptableObjectEditor
@@ -15,8 +15,11 @@ namespace Postive.SimpleSoundManager.Editor.CustomEditor.PropertyDrawers
             EditorGUILayout.LabelField("Sound Settings", EditorStyles.boldLabel);
             var rect = EditorGUILayout.GetControlRect(false, 1);
             rect.height = 1;
-            EditorGUI.DrawRect(rect, new UnityEngine.Color(0.5f, 0.5f, 0.5f, 1));
+            EditorGUI.DrawRect(rect, new Color(0.5f, 0.5f, 0.5f, 1));
             serializedObject.Update();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("_mixer"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("_clips"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("_spacialBlend"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_useRandomVolume"));
             if (!soundData.UseRandomVolume) {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("_volume"));
@@ -45,7 +48,9 @@ namespace Postive.SimpleSoundManager.Editor.CustomEditor.PropertyDrawers
                 EditorGUILayout.EndHorizontal();
                 soundData.PitchRange = pitchRange;
             }
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("_clips"));
+            if (soundData.SpacialBlend > 0) {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("SpatialSetting"));
+            }
             serializedObject.ApplyModifiedProperties();
         }
     }

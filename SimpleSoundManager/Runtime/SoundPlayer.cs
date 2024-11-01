@@ -14,13 +14,10 @@ namespace Postive.SimpleSoundAssetManager.Runtime
         [SoundSelector]
         [SerializeField] private string _soundName = "NONE";
         public void PlaySoundAtPosition(Vector3 position) {
-            SoundManager.PlaySoundAt3D(_soundName, position);
+            SoundManager.PlaySound(_soundName, position);
         }
         public void PlaySoundAtTransform(Transform transform){
             SoundManager.PlaySoundAtTransform(_soundName, transform);
-        }
-        public void PlaySoundAt2D() {
-            SoundManager.PlaySoundAt2D(_soundName);
         }
     }
 }

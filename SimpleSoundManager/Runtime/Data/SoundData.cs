@@ -6,22 +6,33 @@ namespace Postive.SimpleSoundAssetManager.Runtime.Data
 {
     public class SoundData : CategoryElement
     {
-        public AudioClip Clip => _clips[UnityEngine.Random.Range(0, _clips.Length)];
+        public AudioClip Clip {
+            get {
+                if (_clips == null || _clips.Length == 0) return null;
+                return _clips[Random.Range(0, _clips.Length)];
+            }
+        }
         public int ClipCount {
             get {
                 if (_clips == null) return 0;
                 return _clips.Length;
             }
         }
+        public float SpacialBlend {
+            get => _spacialBlend;
+            #if UNITY_EDITOR
+            set => _spacialBlend = value;
+            #endif
+        }
         public float Volume {
-            get => _useRandomVolume ? UnityEngine.Random.Range(_volumeRange.x, _volumeRange.y) : _volume;
+            get => _useRandomVolume ? Random.Range(_volumeRange.x, _volumeRange.y) : _volume;
             #if UNITY_EDITOR
             set => _volume = value;
             #endif
         }
 
         public float Pitch {
-            get => _useRandomPitch ? UnityEngine.Random.Range(_pitchRange.x, _pitchRange.y) : _pitch;
+            get => _useRandomPitch ? Random.Range(_pitchRange.x, _pitchRange.y) : _pitch;
             #if UNITY_EDITOR
             set => _pitch = value;
             #endif
@@ -47,6 +58,12 @@ namespace Postive.SimpleSoundAssetManager.Runtime.Data
             get => _useRandomPitch;
         }
         public AudioMixerGroup Mixer => _mixer;
+        [SerializeField] private AudioClip[] _clips;
+        [Tooltip("The audio mixer group to play the sound on, if null, the sound will play on the master mixer")]
+        [SerializeField] private AudioMixerGroup _mixer;
+        [Tooltip("If spatial blend is 0, the sound will be 2D, if it is 1, the sound will be 3D")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _spacialBlend = 0f;
         [SerializeField] private bool _useRandomVolume = false;
         [Range(0f, 2f)]
         [SerializeField] private float _volume = 1f;
@@ -55,7 +72,6 @@ namespace Postive.SimpleSoundAssetManager.Runtime.Data
         [Range(0f, 2f)]
         [SerializeField] private float _pitch = 1f;
         [SerializeField] private Vector2 _pitchRange = new Vector2(0.9f, 1.1f);
-        [SerializeField] private AudioMixerGroup _mixer;
-        [SerializeField] private AudioClip[] _clips;
+        public SpatialSetting SpatialSetting = new SpatialSetting();
     }
 }
