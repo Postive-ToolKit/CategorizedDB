@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DialogSystem.Dialogs.Components;
 using DialogSystem.Dialogs.Components.Managers;
 using DialogSystem.Runtime.Attributes;
 using DialogSystem.Runtime.Structure.ScriptableObjects;
+using Postive.SimpleDialogAssetManager.Runtime.Dialogs.Events;
 using UnityEngine;
 namespace DialogSystem.Nodes
 {
@@ -22,15 +24,12 @@ namespace DialogSystem.Nodes
         }
         public abstract bool IsNextExist { get; }
         public abstract bool IsAvailableToPlay { get; }
-        public abstract bool UseAutoPlay { get; }
+        public virtual int ChildCount => 0;
         [HideInInspector][SerializeField] private string _guid = "";
         [HideInInspector][SerializeField] private Vector2 _position = new Vector2(0,0);
-
-        public bool IsPlayed {
-            get => _isPlayed;
-            set => _isPlayed = value;
-        }
-        private bool _isPlayed = false;
+        [HideInInspector] public DialogBaseNode[] Children = Array.Empty<DialogBaseNode>();
+        public virtual string Target => "";
+        public virtual string Content => "";
 
         public DialogBaseNode() {
             if (string.IsNullOrEmpty(_guid)) {
@@ -38,12 +37,21 @@ namespace DialogSystem.Nodes
             }
         }
         public abstract DialogBaseNode GetNext();
-        public abstract void Play(DialogManager manager);
-        public virtual void ResetNode() { }
+        public void Play(DialogManager manager) {
+            OnPlay(manager);
+        }
+        protected abstract void OnPlay(DialogManager manager);
+        public virtual void Reset() { }
         protected virtual void CheckIntegrity() { }
-
+        #if UNITY_EDITOR
+        public Action OnNodeChanged;
+        #endif
         public virtual void OnValidate() {
+            Array.Resize(ref Children, ChildCount);
             CheckIntegrity();
+            #if UNITY_EDITOR
+            OnNodeChanged?.Invoke();
+            #endif
         }
     }
 }

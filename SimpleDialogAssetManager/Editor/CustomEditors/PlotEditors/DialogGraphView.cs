@@ -12,13 +12,13 @@ using UnityEngine.UIElements;
 
 namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
 {
-    public class PlotGraphView : GraphView
+    public class DialogGraphView : GraphView
     {
-        public new class UxmlFactory : UxmlFactory<PlotGraphView, GraphView.UxmlTraits> {}
+        public new class UxmlFactory : UxmlFactory<DialogGraphView, GraphView.UxmlTraits> {}
         public Action<DLNodeView> OnNodeSelectionChanged;
-        public DialogPlotGraph Plot => _plot;
-        private DialogPlotGraph _plot;
-        public PlotGraphView() {
+        public DialogGraph Plot => _plot;
+        private DialogGraph _plot;
+        public DialogGraphView() {
             StyleSheet styleSheet = Resources.Load<StyleSheet>("PlotGraphStyle");
             styleSheets.Add(styleSheet);
             Insert(0,new GridBackground());
@@ -33,7 +33,7 @@ namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
             graphViewChanged -= OnGraphViewChanged;
             DeleteElements(graphElements);
         }
-        public void PopulateView(DialogPlotGraph plot)
+        public void PopulateView(DialogGraph plot)
         {
             this._plot = plot;
             if (plot == null) {
@@ -56,6 +56,7 @@ namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
                 var children = plot.GetChildren(n);
                 for(int i = 0; i < children.Count; i++) {
                     var parentView = FindNodeView(n);
+                    if (children[i] == null) continue;
                     var childView = FindNodeView(children[i]);
                     //get output port in index
                     var outputPort = parentView.outputContainer[i] as Port;
@@ -93,6 +94,9 @@ namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
             foreach (var type in types) {
                 evt.menu.AppendAction($"Branch/{type.Name}", a => CreateNode(type,mousePosition));
             }
+            evt.menu.AppendSeparator();
+            //evt.menu.AppendAction("Sort Nodes", a => SortNodes());
+            evt.menu.AppendAction("Return to Start Node", a => ReturnToStartNode());
         }
         private GraphViewChange OnGraphViewChanged(GraphViewChange graphviewChange)
         {
@@ -104,7 +108,9 @@ namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
                     Edge edge = elem as Edge;
                     if (edge != null) {
                         if (edge.input.node is DLNodeView inputNodeView && edge.output.node is DLNodeView outputNodeView) {
-                            _plot.RemoveChild(outputNodeView.Node,inputNodeView.Node);
+                            //find output port index
+                            int index = outputNodeView.outputContainer.IndexOf(edge.output);
+                            _plot.RemoveChild(outputNodeView.Node,index);
                         }
                     }
                 });
@@ -112,7 +118,9 @@ namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
             if (graphviewChange.edgesToCreate != null) {
                 graphviewChange.edgesToCreate.ForEach(edge => {
                     if (edge.input.node is DLNodeView inputNodeView && edge.output.node is DLNodeView outputNodeView) {
-                        _plot.AddChild(outputNodeView.Node,inputNodeView.Node);
+                        //find output port index
+                        int index = outputNodeView.outputContainer.IndexOf(edge.output);
+                        _plot.AddChild(outputNodeView.Node,inputNodeView.Node,index);
                     }
                 });
             }

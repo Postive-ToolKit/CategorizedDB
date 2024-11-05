@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 namespace DialogSystem.Editor.Attributes
 {
-    [CustomPropertyDrawer(typeof(DialogTagSelectorAttribute))]
+    [CustomPropertyDrawer(typeof(DialogTagSelectorAttribute),false)]
     public class DialogTagSelectorPropertyDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)

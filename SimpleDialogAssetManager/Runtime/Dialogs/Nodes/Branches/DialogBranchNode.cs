@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using DialogSystem.Dialogs.Components;
 using DialogSystem.Runtime.Attributes;
 using DialogSystem.Dialogs.Components.Managers;
 using DialogSystem.Runtime.Structure.ScriptableObjects;
-using DialogSystem.Runtime.Structure.ScriptableObjects.Components.Selections;
+using Postive.SimpleDialogAssetManager.Runtime.Interfaces;
 using UnityEngine;
 
 namespace DialogSystem.Nodes.Branches
@@ -21,14 +19,14 @@ namespace DialogSystem.Nodes.Branches
             }
         }
 
-        public override bool IsNextExist => Children.Count > 0;
-        public override bool IsAvailableToPlay => IsNextExist && SelectIndex >= 0 && SelectIndex < Children.Count;
-        public override int ChildCount => _selections.Count;
-        public List<DialogContent> Selections => _selections;
+        public override bool IsNextExist => Children.Length > 0;
+        public override bool IsAvailableToPlay => IsNextExist;// && SelectIndex >= 0 && SelectIndex < Children.Length;
+        public DialogContent[] Selections => _selections;
         private int _selectIndex = -1;
         [DialogTagSelector]
         [SerializeField] private string _selectorTag = "Selections";
-        [SerializeField] private List<DialogContent> _selections = new List<DialogContent>();
+        [SerializeField] private DialogContent[] _selections = Array.Empty<DialogContent>();
+        private bool _isSelectionCreated = false;
         public DialogBranchNode() {
             Type = DialogType.BRANCH;
         }
@@ -37,36 +35,44 @@ namespace DialogSystem.Nodes.Branches
             #if UNITY_EDITOR
                 Debug.Log("DialogBranchNode : GetNext / SelectIndex : " + SelectIndex);
             #endif
-            if (SelectIndex < 0 || SelectIndex >= Children.Count) {
-                return null;
+            if (SelectIndex < 0 || SelectIndex >= Children.Length) {
+                return this;
             }
             return Children[SelectIndex];
         }
-        public override void Play(DialogManager manager){
+        protected override void OnPlay(DialogManager manager){
+            if (_isSelectionCreated) return;
             var selections = Selections;
-            if (selections.Count == 0) {
+            if (selections.Length == 0) {
                 Debug.LogWarning("Selections is empty");
                 return;
             }
-            var targetsWithTags = manager.Selectors.FindAll(t => t.TargetTag == SelectorTag);
-            if (targetsWithTags.Count == 0) {
-                Debug.LogWarning("Target with tag " + SelectorTag + " not found");
-                return;
+            for (int i = 0; i < manager.DialogHandlers.Length; i++) {
+                IDialogHandler handler = manager.DialogHandlers[i];
+                if(!handler.DialogTargetTag.Equals(SelectorTag)) continue;
+                if(!handler.DialogTarget.TryGetComponent(out IDialogSelectionReceiver receiver)) continue;
+                receiver.CreateSelections(selections, manager);
+                receiver.OnSelect += OnSelect;
+                _isSelectionCreated = true;
+                break;
             }
-            targetsWithTags[0].CreateSelections(selections, this, manager);
         }
-        public override void ResetNode()
-        {
+        private void OnSelect(int index) {
+            SelectIndex = index;
+        }
+        public override void Reset() {
             SelectIndex = -1;
+            _isSelectionCreated = false;
         }
         protected override void CheckIntegrity()
         {
-            if (Children.Count == 0) Debug.LogWarning("Selections is empty");
+            if (Children.Length == 0) Debug.LogWarning("Selections is empty");
             #if UNITY_EDITOR
-            if (_selections.Count != Children.Count) {
-                Debug.LogWarning("Selection  is not equal");
-                for (int i = _selections.Count; i < Children.Count; i++) {
-                    _selections.Add(new DialogContent());
+            if (Selections.Length == Children.Length) return; 
+            Array.Resize(ref _selections, Children.Length);
+            for (int i = 0; i < Children.Length; i++) {
+                if (_selections[i] == null) {
+                    _selections[i] = new DialogContent();
                 }
             }
             #endif

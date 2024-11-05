@@ -1,14 +1,16 @@
 ﻿using DialogSystem.Runtime.Attributes;
 using DialogSystem.Dialogs.Components.Managers;
 using DialogSystem.Runtime.Structure.ScriptableObjects;
+using Postive.SimpleDialogAssetManager.Runtime.Dialogs.Events.Lines;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 namespace DialogSystem.Dialogs.Components
 {
-    public class DialogSpeaker : DialogTargetComponent
+    public class DialogSpeaker : DialogTargetComponent , IDialogLineReceiver
     {
+        public bool IsLineFinished => true;
         [Header("Dialog Settings")]
         [SerializeField] private bool _disableRequestWhenSpeaking = false;
         [SerializeField] private bool _clearTextWhenEnd = false;
@@ -16,16 +18,15 @@ namespace DialogSystem.Dialogs.Components
         [SerializeField] private UnityEvent _onStartDialog;
         [SerializeField] private UnityEvent _onOtherSpeakerSpeak;
         [SerializeField] private UnityEvent _onEndPlot;
-        [Header("Audio Settings")]
-        [Tooltip("Enable request delay after audio clip length")]
-        [SerializeField] private bool _useAutoRequest = false;
-        [SerializeField] private float _autoRequestDelay = 0.3f;
-        [SerializeField] private AudioSource _audioSource;
+        // [Header("Audio Settings")]
+        // [Tooltip("Enable request delay after audio clip length")]
+        // [SerializeField] private bool _useAutoRequest = false;
+        // [SerializeField] private float _autoRequestDelay = 0.3f;
+        // [SerializeField] private AudioSource _audioSource;
         private bool _isMyTurn = false;
         protected override void OnAwake() {
-            _audioSource = _audioSource ? _audioSource : gameObject.AddComponent<AudioSource>();
+            //_audioSource = _audioSource ? _audioSource : gameObject.AddComponent<AudioSource>();
         }
-
         public void Speak(DialogContent dialogContent) {
             if (_disableRequestWhenSpeaking) {
                 DialogManager.Instance.IsStopRequest = true;
@@ -40,23 +41,14 @@ namespace DialogSystem.Dialogs.Components
                 }
             }
             _onReceiveDialog?.Invoke(dialogContent.Content);
-            _audioSource.Stop();
-            if (dialogContent.Audio == null) return;
-            _audioSource.clip = dialogContent.Audio;
-            _audioSource.outputAudioMixerGroup = dialogContent.MixerGroup;
-            _audioSource.Play();
-            if (_useAutoRequest) {
-                CancelInvoke();
-                Invoke(nameof(RequestNext), dialogContent.Audio.length + _autoRequestDelay);
-            }
 
         }
         public void OnOtherSpeakerSpeak() {
             _isMyTurn = false;
             _onOtherSpeakerSpeak?.Invoke();
-            _audioSource.Stop();
+            //_audioSource.Stop();
         }
-        public void OnEndPlot() {
+        public override void OnEndPlot() {
             if (_clearTextWhenEnd) {
                 _onReceiveDialog?.Invoke(string.Empty);
             }

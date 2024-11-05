@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace DialogSystem.Runtime.Structure.ScriptableObjects
 {
-    public class DialogPlot : CategoryElement
+    public class Dialog : CategoryElement
     {
         private const string DEFAULT_PATH = "Dialogs";
-        public DialogPlotGraph Plot => _plot;
-        [SerializeField] private DialogPlotGraph _plot;
+        public DialogGraph Plot => _plot;
+        [SerializeField] private DialogGraph _plot;
         public override void CheckIntegrity()
         {
             base.CheckIntegrity();
@@ -30,7 +30,7 @@ namespace DialogSystem.Runtime.Structure.ScriptableObjects
             }
 
             //check is plot is null
-            _plot = CreateInstance<DialogPlotGraph>();
+            _plot = CreateInstance<DialogGraph>();
             _plot.name = Name + " - " + GUID.Substring(0, 8);
             AssetDatabase.CreateAsset(_plot, $"Assets/Resources/{DEFAULT_PATH}/{_plot.name}.asset");
             AssetDatabase.SaveAssets();

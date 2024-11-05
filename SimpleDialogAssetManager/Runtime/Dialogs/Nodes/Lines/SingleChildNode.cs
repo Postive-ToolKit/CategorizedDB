@@ -5,11 +5,9 @@ namespace DialogSystem.Nodes.Lines
 {
     public abstract class SingleChildNode : DialogBaseNode
     {
-        public override bool UseAutoPlay => _useAutoPlay;
-        public override bool IsNextExist => Child != null;
-        public override bool IsAvailableToPlay => true;
+        public override int ChildCount => 1;
+        public override bool IsNextExist => Children[0] != null;
         [SerializeField] private bool _useAutoPlay = false;
-        [HideInInspector] public DialogBaseNode Child = null;
-        public override DialogBaseNode GetNext() => Child;
+        public override DialogBaseNode GetNext() => Children[0];
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace DialogSystem.Runtime.Structure.ScriptableObjects
 {
     [CreateAssetMenu(fileName = "DialogDB", menuName = "Data/DialogDB", order = 0)]
-    public class DialogDB : GenericCategorisedDB<DialogPlot>
+    public class DialogDB : GenericCategorisedDB<Dialog>
     {
         private static readonly List<string> STANDARD_TARGETS = new List<string> {
             "===Base Target===",

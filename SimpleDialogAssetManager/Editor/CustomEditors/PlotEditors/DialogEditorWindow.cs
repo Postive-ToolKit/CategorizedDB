@@ -8,22 +8,22 @@ using UnityEngine.UIElements;
 
 namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
 {
-    public class PlotEditorWindow : EditorWindow
+    public class DialogEditorWindow : EditorWindow
     {
         [SerializeField] private VisualTreeAsset m_VisualTreeAsset = default;
         private ScriptableObject _currentSelectedData;
-        private PlotGraphView _plotGraphView;
-        private PlotEditorInspectorView _plotEditorInspectorView;
+        private DialogGraphView _dialogGraphView;
+        private DialogEditorInspectorView _dialogEditorInspectorView;
         [MenuItem("Window/SDAM Plot Editor Window")]
         public static void OpenWindow()
         {
-            PlotEditorWindow wnd = GetWindow<PlotEditorWindow>();
+            DialogEditorWindow wnd = GetWindow<DialogEditorWindow>();
             wnd.titleContent = new GUIContent("Plot Editor");
         }
         [OnOpenAsset]
         public static bool OnOpenAsset(int instanceID, int line) {
             if (Selection.activeObject is DialogDB db) {
-                PlotEditorWindow wnd = GetWindow<PlotEditorWindow>();
+                DialogEditorWindow wnd = GetWindow<DialogEditorWindow>();
                 wnd.titleContent = new GUIContent("Dialog DB Editor");
 
                 return true;
@@ -41,15 +41,15 @@ namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
             // Each editor window contains a root VisualElement object
             VisualElement root = rootVisualElement;
             
-            _plotGraphView = new PlotGraphView();
-            _plotEditorInspectorView = new PlotEditorInspectorView();
+            _dialogGraphView = new DialogGraphView();
+            _dialogEditorInspectorView = new DialogEditorInspectorView();
             
             DialogEditorSplitView firstSplitView = new DialogEditorSplitView {
                 fixedPaneIndex = 1,
                 fixedPaneInitialDimension = 300
             };
             
-            firstSplitView.Add(_plotGraphView);
+            firstSplitView.Add(_dialogGraphView);
             DialogEditorSplitView secondSplitView = new DialogEditorSplitView {
                 fixedPaneIndex = 1,
                 fixedPaneInitialDimension = 200,
@@ -71,7 +71,7 @@ namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
                         color = new Color(0.8f, 0.8f, 0.8f)
                     }
                 });
-            inspectorScrollView.Add(_plotEditorInspectorView);
+            inspectorScrollView.Add(_dialogEditorInspectorView);
             inspectorContainer.Add(inspectorScrollView);
             
             secondSplitView.Add(inspectorContainer);
@@ -105,11 +105,11 @@ namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
             
             assetTreeView.OnSelectionChanged = (data) => {
                 _currentSelectedData = data;
-                _plotEditorInspectorView.UpdateSelection(data);
-                if (data is not DialogPlot plot) return;
+                _dialogEditorInspectorView.UpdateSelection(data);
+                if (data is not Dialog plot) return;
                 if (plot == null) return;
-                if (plot.Plot == _plotGraphView.Plot) return;
-                _plotGraphView.PopulateView(plot.Plot);
+                if (plot.Plot == _dialogGraphView.Plot) return;
+                _dialogGraphView.PopulateView(plot.Plot);
 
             };
             
@@ -121,21 +121,21 @@ namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
                     Save();
                 }
             });
-            _plotGraphView.OnNodeSelectionChanged += OnNodeSelectionChange;
+            _dialogGraphView.OnNodeSelectionChanged += OnNodeSelectionChange;
             
         }
         private void Save()
         {
-            if (_plotGraphView.Plot == null) return;
+            if (_dialogGraphView.Plot == null) return;
             StringBuilder log = new StringBuilder();
-            log.AppendLine("Save Plot : " + _plotGraphView.Plot.name);
-            log.AppendLine("Path : " + AssetDatabase.GetAssetPath(_plotGraphView.Plot));
+            log.AppendLine("Save Plot : " + _dialogGraphView.Plot.name);
+            log.AppendLine("Path : " + AssetDatabase.GetAssetPath(_dialogGraphView.Plot));
             Debug.Log(log.ToString());
             //save project
             AssetDatabase.SaveAssets();
         }
         private void OnNodeSelectionChange(DLNodeView dlNodeView) {
-            _plotEditorInspectorView.UpdateSelection(dlNodeView.Node);
+            _dialogEditorInspectorView.UpdateSelection(dlNodeView.Node);
         }
     }
 }

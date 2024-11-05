@@ -3,11 +3,11 @@ using UnityEngine.UIElements;
 
 namespace Postive.SimpleDialogAssetManager.Editor.CustomEditors.PlotEditors
 {
-    public class PlotEditorInspectorView : VisualElement
+    public class DialogEditorInspectorView : VisualElement
     {
-        public new class UxmlFactory : UxmlFactory<PlotEditorInspectorView, VisualElement.UxmlTraits> {}
+        public new class UxmlFactory : UxmlFactory<DialogEditorInspectorView, VisualElement.UxmlTraits> {}
         private UnityEditor.Editor _editor;
-        public PlotEditorInspectorView()
+        public DialogEditorInspectorView()
         {
             style.flexGrow = 1;
             style.paddingBottom = 5;

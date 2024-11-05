@@ -1,32 +1,21 @@
 using System.Collections.Generic;
-using DialogSystem.Dialogs.Components;
 using DialogSystem.Dialogs.Components.Managers;
-using DialogSystem.Runtime.Attributes;
-using DialogSystem.Runtime.Structure.ScriptableObjects;
+using Postive.SimpleDialogAssetManager.Runtime.Dialogs.Events;
+using Postive.SimpleDialogAssetManager.Runtime.Dialogs.Events.Lines;
 using UnityEngine;
 
 namespace DialogSystem.Nodes.Lines
 {
-    public class DialogNode : SingleChildNode {
-        [DialogTagSelector] [SerializeField] private string _speakerTag = "NONE";
-        [SerializeField] private DialogContent _dialogContent = new DialogContent();
-        public override void Play(DialogManager manager)
-        {
-            if (_speakerTag.Equals("NONE")) {
-                return;
-            }
+    public class DialogNode : SingleChildNode
+    {
+        public override bool IsAvailableToPlay => _dialogEvents.UseSkip || _dialogEvents.IsEventFinished;
 
-            List<DialogSpeaker> dialogTargets = new List<DialogSpeaker>();
-            List<DialogSpeaker> otherSpeakers = new List<DialogSpeaker>();
-            for (int i = 0; i < manager.Speakers.Count; i++) {
-                if (manager.Speakers[i].TargetTag.Equals(_speakerTag)) {
-                    dialogTargets.Add(manager.Speakers[i]);
-                } else {
-                    otherSpeakers.Add(manager.Speakers[i]);
-                }
-            }
-            dialogTargets.ForEach(target => target.Speak(_dialogContent));
-            otherSpeakers.ForEach(target => target.OnOtherSpeakerSpeak());
+        public override string Content {
+            get => _dialogEvents.Content;
+        }
+        [SerializeField] private DialogEventHolder _dialogEvents = new(new List<DialogEvent>{new DialogLineEvent()});
+        protected override void OnPlay(DialogManager manager) {
+            _dialogEvents.Invoke(manager);
         }
     }
 }
