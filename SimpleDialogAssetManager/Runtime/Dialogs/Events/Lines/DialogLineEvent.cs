@@ -33,7 +33,6 @@ namespace Postive.SimpleDialogAssetManager.Runtime.Dialogs.Events.Lines
                 if (_dialogLineReceivers[i] == null) continue;
                 if (_dialogLineReceivers[i].DialogTargetTag.Equals(DialogTargetTag)) {
                     _dialogLineReceivers[i].Speak(_dialogContent);
-                    Debug.Log("DialogLineEvent: " + _dialogLineReceivers[i].DialogTarget.name);
                 }
                 else {
                     _dialogLineReceivers[i].OnOtherSpeakerSpeak();

@@ -21,7 +21,7 @@ namespace DialogSystem.Nodes.Branches
         }
 
         public override bool IsNextExist => GetNext() != null;
-        public override bool IsAvailableToPlay => IsNextExist;// && SelectIndex >= 0 && SelectIndex < Children.Length;
+        public override bool IsAvailableToPlay => IsNextExist && SelectIndex >= 0 && SelectIndex < Children.Length;
         public DialogContent[] Selections => _selections;
 
         public override string Content {
@@ -46,9 +46,6 @@ namespace DialogSystem.Nodes.Branches
         }
         public override DialogBaseNode GetNext()
         {
-            #if UNITY_EDITOR
-                Debug.Log("DialogBranchNode : GetNext / SelectIndex : " + SelectIndex);
-            #endif
             if (SelectIndex < 0 || SelectIndex >= Children.Length) {
                 return this;
             }
@@ -73,6 +70,7 @@ namespace DialogSystem.Nodes.Branches
         }
         private void OnSelect(int index) {
             SelectIndex = index;
+            Debug.Log($"Selected index: {SelectIndex}");
         }
         public override void Reset() {
             SelectIndex = -1;

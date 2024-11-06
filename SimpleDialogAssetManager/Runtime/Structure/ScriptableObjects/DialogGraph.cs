@@ -35,16 +35,15 @@ namespace DialogSystem.Runtime.Structure.ScriptableObjects
             return true;
         }
         private void PlayNode(DialogManager manager) {
-#if UNITY_EDITOR
-            Debug.Log(CurrentNode.name + " : " + CurrentNode.Content);
-#endif
+
             if (!CurrentNode.IsAvailableToPlay) {
                 Debug.LogWarning("Node is not available to play");
                 return;
             }
-            CurrentNode.Play(manager);
             CurrentNode = CurrentNode.IsNextExist ? CurrentNode.GetNext() : null;
-
+            if (IsPlotEnd) return;
+            //Debug.Log($"Play {CurrentNode.name}");
+            CurrentNode?.Play(manager);
         }
         #region Editor
         #if UNITY_EDITOR

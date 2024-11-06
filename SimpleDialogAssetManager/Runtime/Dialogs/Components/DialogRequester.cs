@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DialogSystem.Dialogs.Components
 {
-    public class DialogPlotRequester : MonoBehaviour
+    public class DialogRequester : MonoBehaviour
     {
         [DialogSelector][SerializeField] private List<string> _plotIds = new List<string>();
         public void RequestDialogByIndex(int index)

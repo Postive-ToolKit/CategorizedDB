@@ -38,6 +38,7 @@ namespace DialogSystem.Nodes
         }
         public abstract DialogBaseNode GetNext();
         public void Play(DialogManager manager) {
+            Debug.Log("Play Dialog : " + name);
             OnPlay(manager);
         }
         protected abstract void OnPlay(DialogManager manager);

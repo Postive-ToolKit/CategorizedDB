@@ -1,19 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using DialogSystem.Runtime.Attributes;
-using DialogSystem.Runtime.Structure.ScriptableObjects.Components.Selections;
+﻿using System.Collections.Generic;
 using DialogSystem.Runtime.Structure.ScriptableObjects;
 using Postive.SimpleDialogAssetManager.Runtime.Interfaces;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 namespace DialogSystem.Dialogs.Components.Managers
 {
-    /// <summary>
-    /// The dialog manager that manage all dialog
-    /// </summary>
-    [RequireComponent(typeof(DialogPlotSelector))]
     public class DialogManager : MonoBehaviour
     {
         /// <summary>
@@ -45,7 +36,7 @@ namespace DialogSystem.Dialogs.Components.Managers
         [SerializeField] private DialogGraph _currentDialog = null;
 
         private readonly List<IDialogHandler> _dialogHandlers = new List<IDialogHandler>();
-        private void Awake() {
+        private void Start() {
             _currentDialog.PlayPlot();
             Play();
         }
@@ -96,6 +87,10 @@ namespace DialogSystem.Dialogs.Components.Managers
             }
             //Read Plot
             _currentDialog.Play(this);
+            if (_currentDialog.IsPlotEnd) {
+                Debug.Log("Dialog End");
+                EndPlot();
+            }
         }
         /// <summary>
         /// Invoke when dialog is end
