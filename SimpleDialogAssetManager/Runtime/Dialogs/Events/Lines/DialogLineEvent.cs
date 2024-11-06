@@ -17,7 +17,9 @@ namespace Postive.SimpleDialogAssetManager.Runtime.Dialogs.Events.Lines
                 return true;
             }
         }
-        public override string Content => base.Content + "\n" + _dialogContent.Content;
+        public override string Content =>
+            base.Content +
+            $"{_dialogContent.Content}";
         [SerializeField] private DialogContent _dialogContent;
         private List<IDialogLineReceiver> _dialogLineReceivers;
         public override void Invoke(DialogManager manager) {

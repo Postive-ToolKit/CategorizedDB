@@ -34,7 +34,8 @@ namespace Postive.SimpleDialogAssetManager.Runtime.Dialogs.Events
                 for(int i = 0; i < _dialogEvents.Count; i++){
                     if (_dialogEvents[i] == null) continue;
                     sb.Append(_dialogEvents[i].Content);
-                    sb.Append("\n");
+                    if (i == _dialogEvents.Count - 1) continue;
+                    sb.Append("\n<size=16><b>--------------------</size></b>\n");
                 }
                 return sb.ToString();
             }

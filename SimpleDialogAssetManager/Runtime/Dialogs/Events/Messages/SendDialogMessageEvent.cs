@@ -19,7 +19,7 @@ namespace Postive.SimpleDialogAssetManager.Runtime.Dialogs.Events.Messages
                 return true;
             }
         }
-        public override string Content => base.Content + "\n" + EventMessage;
+        public override string Content => base.Content + EventMessage;
         [DialogTagSelector] public List<string> EventTargets;
         public string EventMessage;
         private List<IDialogMessageReceiver> _receivers;

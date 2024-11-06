@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using DialogSystem.Runtime.Attributes;
 using DialogSystem.Dialogs.Components.Managers;
 using DialogSystem.Runtime.Structure.ScriptableObjects;
@@ -19,9 +20,22 @@ namespace DialogSystem.Nodes.Branches
             }
         }
 
-        public override bool IsNextExist => Children.Length > 0;
+        public override bool IsNextExist => GetNext() != null;
         public override bool IsAvailableToPlay => IsNextExist;// && SelectIndex >= 0 && SelectIndex < Children.Length;
         public DialogContent[] Selections => _selections;
+
+        public override string Content {
+            get {
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < Selections.Length; i++) {
+                    builder.Append($"{i + 1}.{Selections[i].Content}");
+                    if (i < Selections.Length - 1) {
+                        builder.Append("\n");
+                    }
+                }
+                return builder.ToString();
+            }
+        }
         private int _selectIndex = -1;
         [DialogTagSelector]
         [SerializeField] private string _selectorTag = "Selections";
