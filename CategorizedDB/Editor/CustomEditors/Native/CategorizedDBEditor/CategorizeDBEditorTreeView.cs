@@ -10,7 +10,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
     {
         public Action<ContextualMenuPopulateEvent> OnCreateContextMenu;
         public new class UxmlFactory : UxmlFactory<CategorizeDBEditorTreeView, TreeView.UxmlTraits> {}
-        public Action<CategoryScriptableObject> OnSelectionChanged;
+        public Action<ScriptableObject> OnSelectionChanged;
         private Category _selectedCategory = null;
         private CategoryElement _selectedData = null;
 
@@ -49,6 +49,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
                     SetSelection(new List<int>());
                     _selectedCategory = null;
                     _selectedData = null;
+                    OnSelectionChanged?.Invoke(DB);
                 }
             });
             
