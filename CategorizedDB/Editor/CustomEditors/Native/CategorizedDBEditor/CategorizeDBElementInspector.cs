@@ -1,4 +1,5 @@
 ﻿using Postive.CategorizedDB.Runtime.Categories;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
@@ -15,7 +16,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
             style.paddingRight = 5;
             style.paddingTop = 5;
         }
-        internal void UpdateSelection(CategoryScriptableObject data)
+        internal void UpdateSelection(ScriptableObject data)
         {
             if (data == null) {
                 Clear();
