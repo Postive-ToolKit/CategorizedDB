@@ -44,7 +44,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors
         public virtual void ShowOtherProperties() {
 #if ODIN_INSPECTOR
             _propertyTree.UpdateTree();
-            var tree = _propertyTree.EnumerateTree(true);
+            var tree = _propertyTree.EnumerateTree(false);
             _propertyTree.BeginDraw(false);
             foreach (var property in tree) {
                 if (!_defaultProperties.Contains(property.Name)) {
