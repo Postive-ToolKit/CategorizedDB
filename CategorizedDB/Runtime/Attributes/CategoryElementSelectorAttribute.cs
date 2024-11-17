@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace Runtime.Attributes
 {
-    public class CategoryElementSelectorAttribute : PropertyAttribute
+    public abstract class CategoryElementSelectorAttribute : PropertyAttribute
     {
-        public ICategoryElementFinder ElementFinder { get; protected set; }
+        public abstract ICategoryElementFinder ElementFinder { get; }
     }
 }
