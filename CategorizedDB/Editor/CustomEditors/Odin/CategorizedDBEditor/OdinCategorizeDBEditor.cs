@@ -1,4 +1,6 @@
 ﻿#if ODIN_INSPECTOR
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Postive.CategorizedDB.Runtime.Categories;
 using Sirenix.OdinInspector.Editor;
@@ -16,6 +18,16 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
 
         private Category _selectedCategory;
         private T _selectedData;
+        //on window created
+        protected override void OnEnable() {
+            base.OnEnable();
+            this.titleContent = new GUIContent(WindowTarget);
+            this.WindowPadding = Vector4.zero;
+            this.WindowPadding = Vector4.zero;
+            
+            this.position = new Rect(100, 100, 1280, 720);
+            minSize = new Vector2(800, 600);
+        }
         protected override OdinMenuTree BuildMenuTree()
         {
             var tree = new OdinMenuTree(true) {
@@ -98,7 +110,35 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
                     CurrentDB.AddCategory(_selectedCategory);
                 }
                 if (SirenixEditorGUI.ToolbarButton(new GUIContent("Create Data"))) {
-                    CurrentDB.CreateData(_selectedCategory);
+
+                    
+                    var types = TypeCache.GetTypesDerivedFrom<T>().Where(x => !x.IsAbstract);
+                    List<Type> typesList = new List<Type>();
+                    if(!typeof(T).IsAbstract) typesList.Add(typeof(T));
+                    typesList.AddRange(types);
+                    typesList.Sort((x,y) => String.Compare(x.Name, y.Name, StringComparison.Ordinal));
+                    switch (typesList.Count) {
+                        case 0:
+                            break;
+                        case 1:
+                            CurrentDB.CreateData(typesList[0],_selectedCategory);
+                            break;
+                        default:
+                            List<EditorDropDownSelector.Content> contents = new List<EditorDropDownSelector.Content>();
+                            foreach (var type in typesList) {
+                                contents.Add(new EditorDropDownSelector.Content() {
+                                    Title = $"Add {type.Name}",
+                                    OnSelect = () => {
+                                        CurrentDB.CreateData(type,_selectedCategory);
+                                    }
+                                });
+                            }
+                            var selector = new EditorDropDownSelector(contents.ToArray());
+                            selector.ShowInPopup(200);
+                            break;
+                    }
+                    
+
                 }
 
                 if (_selectedData != null||_selectedCategory != null) {

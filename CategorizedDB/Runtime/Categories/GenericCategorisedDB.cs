@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 #if UNITY_EDITOR
+using System;
 using UnityEditor;
 #endif
 using UnityEngine;
@@ -21,9 +22,13 @@ namespace Postive.CategorizedDB.Runtime.Categories
             return result;
         }
 #if UNITY_EDITOR
-        public override void CreateData(Category selectedCategory = null)
+        public override void CreateData(Type type,Category selectedCategory = null)
         {
-            T data = CreateInstance<T>();
+            if (type != typeof(T)&&!type.IsSubclassOf(typeof(T))) {
+                Debug.LogError("Type is not subclass of T.");
+                return;
+            }
+            T data = CreateInstance(type) as T;
             if (data == null) {
                 Debug.LogError("Data is null.");
                 return;

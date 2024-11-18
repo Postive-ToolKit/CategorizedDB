@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Postive.CategorizedDB.Runtime.Categories;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
 {
-    public class CategorizeDBEditorTreeView : TreeView
+    public class CategorizeDBEditorTreeView<T> : TreeView where T : CategoryElement
     {
         public Action<ContextualMenuPopulateEvent> OnCreateContextMenu;
-        public new class UxmlFactory : UxmlFactory<CategorizeDBEditorTreeView, TreeView.UxmlTraits> {}
+        public new class UxmlFactory : UxmlFactory<CategorizeDBEditorTreeView<T>, TreeView.UxmlTraits> {}
         public Action<ScriptableObject> OnSelectionChanged;
         private Category _selectedCategory = null;
         private CategoryElement _selectedData = null;
-
         public CategorisedElementDB DB {
             get => _db;
             set {
@@ -133,14 +134,34 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
         }
         private void BuildContextMenu(ContextualMenuPopulateEvent evt)
         {
-            evt.menu.AppendAction(_selectedData == null ? "Target : Root":  $"Target : {_selectedCategory.Name}",null);
+            evt.menu.AppendAction(_selectedCategory == null ? "Target : Root":  $"Target : {_selectedCategory.Name}",null);
             evt.menu.AppendSeparator();
             evt.menu.AppendAction("Add Category", (action) => {
                 _db.AddCategory(_selectedCategory);
             });
-            evt.menu.AppendAction("Add Element", (action) => {
-                _db.CreateData(_selectedCategory);
-            });
+            
+            var types = TypeCache.GetTypesDerivedFrom<T>().Where(x => !x.IsAbstract);
+            List<Type> typesList = new List<Type>();
+            if(!typeof(T).IsAbstract) typesList.Add(typeof(T));
+            typesList.AddRange(types);
+            typesList.Sort((x,y) => String.Compare(x.Name, y.Name, StringComparison.Ordinal));
+            switch (typesList.Count) {
+                case 0:
+                    break;
+                case 1:
+                    evt.menu.AppendAction($"Add {typesList[0].Name}", (action) => {
+                        _db.CreateData(typesList[0],_selectedCategory);
+                    });
+                    break;
+                default:
+                    foreach (var type in typesList) {
+                        evt.menu.AppendAction($"Add Element/{type.Name}", (action) => {
+                            _db.CreateData(type,_selectedCategory);
+                        });
+                    }
+                    break;
+            }
+            
             if (_selectedData != null || _selectedCategory != null) {
                 evt.menu.AppendAction("Delete", (action) => {
                     if (_selectedData != null) {
@@ -161,6 +182,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
             var data = item.Current;
             if (data is CategoryElement categoryElement) {
                 _selectedData = categoryElement;
+                _selectedCategory = null;
                 OnSelectionChanged?.Invoke(categoryElement);
             }
             if (data is Category category) {

@@ -5,20 +5,20 @@ using UnityEngine.UIElements;
 
 namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
 {
-    public abstract class CategorizeDBEditor : EditorWindow
+    public abstract class CategorizeDBEditor<T> : EditorWindow where T : CategoryElement
     {
         protected abstract CategorisedElementDB CurrentDB { get; }
     
         protected CategorizeDBElementInspector _inspectorView;
-        protected CategorizeDBEditorTreeView _treeView;
+        protected CategorizeDBEditorTreeView<T> _treeView;
 
         public void CreateGUI()
         {
             VisualElement root = rootVisualElement;
-            //get CategorizeDBEditor.cs path
-            _inspectorView = new CategorizeDBElementInspector();
-            _treeView = new CategorizeDBEditorTreeView();
             
+            _inspectorView = new CategorizeDBElementInspector();
+            _treeView = new CategorizeDBEditorTreeView<T>();
+
             CategorizeDBEditorSplitView splitView = new CategorizeDBEditorSplitView {
                 //set split view default left size
                 fixedPaneInitialDimension = 200
@@ -28,17 +28,19 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
             treeViewContainer.Add(_treeView);
             splitView.Add(treeViewContainer);
             
-            //parse 3C3C3C to Color
             ColorUtility.TryParseHtmlString("#3C3C3C", out Color color);
-            
             var inspectorViewContainer = new VisualElement() { style = { flexGrow = 1 ,
                 backgroundColor = new StyleColor() {
                 value = color
             }} };
+            
             inspectorViewContainer.Add(_inspectorView);
             splitView.Add(inspectorViewContainer);
             
             root.Add(splitView);
+            
+            minSize = new Vector2(800, 600);
+            
             
             _treeView.DB = CurrentDB;
             _treeView.OnSelectionChanged = _inspectorView.UpdateSelection;

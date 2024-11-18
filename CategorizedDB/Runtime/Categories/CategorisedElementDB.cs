@@ -16,7 +16,7 @@ namespace Postive.CategorizedDB.Runtime.Categories
 #endif
         [SerializeField] protected List<CategoryElement> _elements = new List<CategoryElement>();
 #if UNITY_EDITOR
-        public abstract void CreateData(Category selectedCategory = null);
+        public abstract void CreateData(Type type,Category selectedCategory = null);
         public abstract void RemoveData(CategoryElement data);
 #endif
         protected override void CheckIntegrity() {
