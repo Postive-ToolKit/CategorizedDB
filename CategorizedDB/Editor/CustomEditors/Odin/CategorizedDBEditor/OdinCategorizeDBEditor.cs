@@ -109,7 +109,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
                 if (SirenixEditorGUI.ToolbarButton(new GUIContent("Create Category"))) {
                     CurrentDB.AddCategory(_selectedCategory);
                 }
-                if (SirenixEditorGUI.ToolbarButton(new GUIContent("Create Data"))) {
+                if (SirenixEditorGUI.ToolbarButton(new GUIContent("Create Element"))) {
 
                     
                     var types = TypeCache.GetTypesDerivedFrom<T>().Where(x => !x.IsAbstract);
@@ -127,7 +127,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
                             List<EditorDropDownSelector.Content> contents = new List<EditorDropDownSelector.Content>();
                             foreach (var type in typesList) {
                                 contents.Add(new EditorDropDownSelector.Content() {
-                                    Title = $"Add {type.Name}",
+                                    Title = $"{type.Name}",
                                     OnSelect = () => {
                                         CurrentDB.CreateData(type,_selectedCategory);
                                     }
