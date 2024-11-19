@@ -19,15 +19,20 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
         private Category _selectedCategory;
         private T _selectedData;
         //on window created
+        private bool _rebuildRequested = false;
+        private void RequestRebuild() {
+            _rebuildRequested = true;
+        }
         protected override void OnEnable() {
             base.OnEnable();
             this.titleContent = new GUIContent(WindowTarget);
             this.WindowPadding = Vector4.zero;
             this.WindowPadding = Vector4.zero;
             
-            this.position = new Rect(100, 100, 1280, 720);
-            minSize = new Vector2(800, 600);
+            // this.position = new Rect(100, 100, 1280, 720);
+            // minSize = new Vector2(800, 600);
         }
+
         protected override OdinMenuTree BuildMenuTree()
         {
             var tree = new OdinMenuTree(true) {
@@ -36,17 +41,18 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
             tree.Selection.SupportsMultiSelect = false;
             tree.Config.DrawSearchToolbar = false;
             tree.DefaultMenuStyle.IconSize = 28.00f;
-            CurrentDB.OnDataChanged = ForceMenuTreeRebuild;
+            CurrentDB.OnDataChanged = RequestRebuild;
             var categories = CurrentDB.Categories;
             for (int i = 0; i < categories.Count; i++) {
                 var category = categories[i];
                 tree.Add(category.GetPath(), category);
             }
             for (int i = 0; i < CurrentDB.Elements.Count; i++) {
-                var patternData = CurrentDB.Elements[i];
-                string dataName = patternData.Name;
+                var element = CurrentDB.Elements[i];
+                string dataName = element.Name;
+                element.OnDataChanged = RequestRebuild;
                 if (string.IsNullOrEmpty(dataName)) dataName = $"Empty {i}";
-                tree.Add($"{patternData.GetPath()}/{dataName}", patternData);
+                tree.Add($"{element.GetPath()}/{dataName}", element);
             }
             tree.Selection.SelectionChanged += t => {
                 if (tree.Selection.Count == 0) return;
@@ -76,16 +82,15 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
         {
             _timer += Time.deltaTime;
             if (_timer < UPDATE_INTERVAL) return;
+            if (!_rebuildRequested) return;
             _timer = 0;
-            if (_selectedData != null)
-            {
+            if (_selectedData != null) {
                 ForceMenuTreeRebuild();
                 if (this.MenuTree.Selection.Count != 0) return;
                 MenuTree.Selection.Clear();
                 MenuTree.Selection.Add(MenuTree.EnumerateTree().First(x => x.Value == _selectedData));
             }
-            else if (_selectedCategory != null)
-            {
+            else if (_selectedCategory != null) {
                 ForceMenuTreeRebuild();
                 if (this.MenuTree.Selection.Count != 0) return;
                 MenuTree.Selection.Clear();
@@ -95,6 +100,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
         
         protected override void OnBeginDrawEditors()
         {
+            
             var selected = this.MenuTree.Selection.FirstOrDefault();
             var toolbarHeight = this.MenuTree.Config.SearchToolbarHeight;
             SirenixEditorGUI.BeginHorizontalToolbar(toolbarHeight);
@@ -110,8 +116,6 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
                     CurrentDB.AddCategory(_selectedCategory);
                 }
                 if (SirenixEditorGUI.ToolbarButton(new GUIContent("Create Element"))) {
-
-                    
                     var types = TypeCache.GetTypesDerivedFrom<T>().Where(x => !x.IsAbstract);
                     List<Type> typesList = new List<Type>();
                     if(!typeof(T).IsAbstract) typesList.Add(typeof(T));
