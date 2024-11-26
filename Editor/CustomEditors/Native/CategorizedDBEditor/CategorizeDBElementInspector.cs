@@ -1,12 +1,10 @@
-﻿using Postive.CategorizedDB.Runtime.Categories;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
 {
     public class CategorizeDBElementInspector : VisualElement
     {
-        public new class UxmlFactory : UxmlFactory<CategorizeDBElementInspector, UxmlTraits> {}
         private UnityEditor.Editor _editor;
 
         public CategorizeDBElementInspector() {

@@ -88,13 +88,13 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
                 ForceMenuTreeRebuild();
                 if (this.MenuTree.Selection.Count != 0) return;
                 MenuTree.Selection.Clear();
-                MenuTree.Selection.Add(MenuTree.EnumerateTree().First(x => x.Value == _selectedData));
+                MenuTree.Selection.Add(MenuTree.EnumerateTree().First(x => (T)x.Value == _selectedData));
             }
             else if (_selectedCategory != null) {
                 ForceMenuTreeRebuild();
                 if (this.MenuTree.Selection.Count != 0) return;
                 MenuTree.Selection.Clear();
-                MenuTree.Selection.Add(MenuTree.EnumerateTree().First(x => x.Value == _selectedCategory));
+                MenuTree.Selection.Add(MenuTree.EnumerateTree().First(x => (Category)x.Value == _selectedCategory));
             }
         }
         

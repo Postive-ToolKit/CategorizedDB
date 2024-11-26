@@ -11,7 +11,6 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
     public class CategorizeDBEditorTreeView<T> : TreeView where T : CategoryElement
     {
         public Action<ContextualMenuPopulateEvent> OnCreateContextMenu;
-        public new class UxmlFactory : UxmlFactory<CategorizeDBEditorTreeView<T>, TreeView.UxmlTraits> {}
         public Action<ScriptableObject> OnSelectionChanged;
         private Category _selectedCategory = null;
         private CategoryElement _selectedData = null;
