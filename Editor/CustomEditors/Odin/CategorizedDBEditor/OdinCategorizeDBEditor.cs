@@ -12,7 +12,6 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
 {
     public abstract class OdinCategorizeDBEditor<T> : OdinMenuEditorWindow where T : CategoryElement
     {
-        protected abstract string WindowTarget{ get; }
         protected abstract GenericCategorisedDB<T> CurrentDB { get; }
         private const float UPDATE_INTERVAL = 0.1f;
 
@@ -25,7 +24,6 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
         }
         protected override void OnEnable() {
             base.OnEnable();
-            this.titleContent = new GUIContent(WindowTarget);
             this.WindowPadding = Vector4.zero;
             this.WindowPadding = Vector4.zero;
             
@@ -36,7 +34,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
         protected override OdinMenuTree BuildMenuTree()
         {
             var tree = new OdinMenuTree(true) {
-                { WindowTarget, CurrentDB, EditorIcons.File },
+                { CurrentDB.name, CurrentDB, EditorIcons.File },
             };
             tree.Selection.SupportsMultiSelect = false;
             tree.Config.DrawSearchToolbar = false;
