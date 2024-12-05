@@ -17,7 +17,9 @@ namespace Postive.CategorizedDB.Editor.CustomEditors
         private PropertyTree _propertyTree;
 #endif
         private void OnEnable() {
-            _categoryScriptableObject = (CategoryScriptableObject) target;
+            if (target is CategoryScriptableObject categoryScriptableObject) {
+                _categoryScriptableObject = categoryScriptableObject;
+            }
 #if ODIN_INSPECTOR
             _propertyTree = PropertyTree.Create(serializedObject.targetObject);
 #endif
