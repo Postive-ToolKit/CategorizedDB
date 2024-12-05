@@ -25,6 +25,7 @@ CategorizedDB는 유니티에서 사용 가능한 데이터 저장소입니다. 
     - [Git URL](#git-url)
     - [마무리](#마무리)
 ## Simple Usage
+- [가이드 비디오](https://youtu.be/jsXMfcCQgvc)
 - `CategoryElement`를 상속하여 카테고리 기반의 데이터 클래스를 생성
 - `GenericCategorizedDB<T>`를 위에서 구현한 `Elememt` 데이터 클래스를 제너릭으로 상속하여 DB 클래스를 생성
 - `CategoryDBEditor<T>`을 상속받아 `EditorWindow` 생성
