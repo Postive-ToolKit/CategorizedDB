@@ -12,8 +12,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
     {
         public Action<ContextualMenuPopulateEvent> OnCreateContextMenu;
         public Action<ScriptableObject> OnSelectionChanged;
-        private Category _selectedCategory = null;
-        private CategoryElement _selectedData = null;
+        private CategoryScriptableObject _selected = null;
         public CategorisedElementDB DB {
             get => _db;
             set {
@@ -47,8 +46,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
             this.RegisterCallback<MouseDownEvent>(evt => {
                 if (evt.clickCount == 2) {
                     SetSelection(new List<int>());
-                    _selectedCategory = null;
-                    _selectedData = null;
+                    _selected = null;
                     OnSelectionChanged?.Invoke(DB);
                 }
             });
@@ -133,10 +131,11 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
         }
         private void BuildContextMenu(ContextualMenuPopulateEvent evt)
         {
-            evt.menu.AppendAction(_selectedCategory == null ? "Target : Root":  $"Target : {_selectedCategory.Name}",null);
+            Category currentCategory = _selected as Category;
+            evt.menu.AppendAction(currentCategory == null ? "Target : Root":  $"Target : {currentCategory.Name}",null);
             evt.menu.AppendSeparator();
             evt.menu.AppendAction("Add Category", (action) => {
-                _db.AddCategory(_selectedCategory);
+                _db.AddCategory(currentCategory);
             });
             
             var types = TypeCache.GetTypesDerivedFrom<T>().Where(x => !x.IsAbstract);
@@ -149,26 +148,25 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
                     break;
                 case 1:
                     evt.menu.AppendAction($"Add {typesList[0].Name}", (action) => {
-                        _db.CreateData(typesList[0],_selectedCategory);
+                        _db.CreateData(typesList[0],currentCategory);
                     });
                     break;
                 default:
                     foreach (var type in typesList) {
                         evt.menu.AppendAction($"Add Element/{type.Name}", (action) => {
-                            _db.CreateData(type,_selectedCategory);
+                            _db.CreateData(type,currentCategory);
                         });
                     }
                     break;
             }
             
-            if (_selectedData != null || _selectedCategory != null) {
+            if (_selected != null) {
                 evt.menu.AppendAction("Delete", (action) => {
-                    if (_selectedData != null) {
-                        _db.RemoveData(_selectedData);
+                    if (_selected is Category category) {
+                        _db.RemoveCategory(category);
                     }
-                    else if (_selectedCategory != null) {
-                        _db.RemoveCategory(_selectedCategory);
-                        _selectedCategory = null;
+                    else if (_selected is CategoryElement element) {
+                        _db.RemoveData(element);
                     }
                     RequestRebuild();
                 });
@@ -179,14 +177,9 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
             var item = items.GetEnumerator();
             if (!item.MoveNext()) return;
             var data = item.Current;
-            if (data is CategoryElement categoryElement) {
-                _selectedData = categoryElement;
-                _selectedCategory = null;
-                OnSelectionChanged?.Invoke(categoryElement);
-            }
-            if (data is Category category) {
-                _selectedCategory = category;
-                OnSelectionChanged?.Invoke(category);
+            if (data is CategoryScriptableObject categoryScriptable) {
+                _selected = categoryScriptable;
+                OnSelectionChanged?.Invoke(_selected);
             }
         }
     }
