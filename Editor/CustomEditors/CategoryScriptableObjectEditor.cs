@@ -29,6 +29,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_parentGUID"));
             //show path
             EditorGUILayout.LabelField("Path", _categoryScriptableObject.GetPath());
+            EditorGUILayout.TextField("GUID", _categoryScriptableObject.GUID);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_name"));
             if (GUI.changed) {
                 serializedObject.ApplyModifiedProperties();
