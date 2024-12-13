@@ -24,7 +24,6 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
         private CategorisedElementDB _db;
         private int _selectedId;
         private Dictionary<string,int> _expandedIds = new Dictionary<string, int>();
-        private Dictionary<string,int> _elementIds = new Dictionary<string, int>();
         private int _currentId = 0;
         private bool _wasRebuildRequested = false;
         public CategorizeDBEditorTreeView()

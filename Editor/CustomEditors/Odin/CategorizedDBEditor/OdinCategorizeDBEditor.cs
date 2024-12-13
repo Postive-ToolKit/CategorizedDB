@@ -14,9 +14,8 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
     {
         protected abstract GenericCategorisedDB<T> CurrentDB { get; }
         private const float UPDATE_INTERVAL = 0.1f;
-
-        private Category _selectedCategory;
-        private T _selectedData;
+        
+        private CategoryScriptableObject _selected;
         //on window created
         private bool _rebuildRequested = false;
         private void RequestRebuild() {
@@ -45,27 +44,28 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
                 var category = categories[i];
                 tree.Add(category.GetPath(), category);
             }
+            Dictionary<string,int> samePath = new Dictionary<string, int>();
             for (int i = 0; i < CurrentDB.Elements.Count; i++) {
                 var element = CurrentDB.Elements[i];
                 string dataName = element.Name;
                 element.OnDataChanged = RequestRebuild;
                 if (string.IsNullOrEmpty(dataName)) dataName = $"Empty {i}";
+                if (samePath.ContainsKey(dataName)) {
+                    samePath[dataName]++;
+                    dataName = $"{dataName} ({samePath[dataName]})";
+                }
+                else {
+                    samePath.Add(dataName, 0);
+                }
                 tree.Add($"{element.GetPath()}/{dataName}", element);
             }
             tree.Selection.SelectionChanged += t => {
                 if (tree.Selection.Count == 0) return;
-                if (tree.Selection[0].Value is T data) {
-                    _selectedData = data;
-                    _selectedCategory = null;
-                }
-                else if (tree.Selection[0].Value is Category category)
-                {
-                    _selectedCategory = category;
-                    _selectedData = null;
+                if (tree.Selection[0].Value is CategoryScriptableObject data) {
+                    _selected = data;
                 }
                 else {
-                    _selectedData = null;
-                    _selectedCategory = null;
+                    _selected = null;
                 }
             };
             return tree;
@@ -82,17 +82,13 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
             if (_timer < UPDATE_INTERVAL) return;
             if (!_rebuildRequested) return;
             _timer = 0;
-            if (_selectedData != null) {
+            //save last selection
+            var selected = this.MenuTree.Selection.FirstOrDefault();
+            if (_selected != null) {
                 ForceMenuTreeRebuild();
                 if (this.MenuTree.Selection.Count != 0) return;
                 MenuTree.Selection.Clear();
-                MenuTree.Selection.Add(MenuTree.EnumerateTree().First(x => (T)x.Value == _selectedData));
-            }
-            else if (_selectedCategory != null) {
-                ForceMenuTreeRebuild();
-                if (this.MenuTree.Selection.Count != 0) return;
-                MenuTree.Selection.Clear();
-                MenuTree.Selection.Add(MenuTree.EnumerateTree().First(x => (Category)x.Value == _selectedCategory));
+                MenuTree.Selection.Add(selected);
             }
         }
         
@@ -104,6 +100,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
             SirenixEditorGUI.BeginHorizontalToolbar(toolbarHeight);
             {
                 string currentTitle = selected != null ? selected.Name : "No Selection";
+                Category category = _selected as Category;
                 GUILayout.Label(currentTitle);
                 OnCreateMenuFront();
                 if (SirenixEditorGUI.ToolbarButton(new GUIContent("Save"))) {
@@ -111,7 +108,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
                     AssetDatabase.SaveAssets();
                 }
                 if (SirenixEditorGUI.ToolbarButton(new GUIContent("Create Category"))) {
-                    CurrentDB.AddCategory(_selectedCategory);
+                    CurrentDB.AddCategory(category);
                 }
                 if (SirenixEditorGUI.ToolbarButton(new GUIContent("Create Element"))) {
                     var types = TypeCache.GetTypesDerivedFrom<T>().Where(x => !x.IsAbstract);
@@ -123,7 +120,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
                         case 0:
                             break;
                         case 1:
-                            CurrentDB.CreateData(typesList[0],_selectedCategory);
+                            CurrentDB.CreateData(typesList[0],category);
                             break;
                         default:
                             List<EditorDropDownSelector.Content> contents = new List<EditorDropDownSelector.Content>();
@@ -131,7 +128,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
                                 contents.Add(new EditorDropDownSelector.Content() {
                                     Title = $"{type.Name}",
                                     OnSelect = () => {
-                                        CurrentDB.CreateData(type,_selectedCategory);
+                                        CurrentDB.CreateData(type,category);
                                     }
                                 });
                             }
@@ -143,16 +140,14 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Odin.CategorizedDBEditor
 
                 }
 
-                if (_selectedData != null||_selectedCategory != null) {
+                if (_selected != null) {
                     if (SirenixEditorGUI.ToolbarButton(new GUIContent("Delete"))) {
-                        if (_selectedData != null) {
-                            CurrentDB.RemoveData(_selectedData);
+                        if (_selected is Category) {
+                            CurrentDB.RemoveCategory(_selected as Category);
                         }
-                        else if (_selectedCategory != null) {
-                            CurrentDB.RemoveCategory(_selectedCategory);
-                            _selectedCategory = null;
+                        else {
+                            CurrentDB.RemoveData(_selected as T);
                         }
-
                     }
                 }
                 OnCreateMenuBehind();
