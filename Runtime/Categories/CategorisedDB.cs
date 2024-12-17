@@ -28,7 +28,7 @@ namespace Postive.CategorizedDB.Runtime.Categories
             return _categories[result].GetPath();
         }
 
-        public CategoryScriptableObject GetParent(string guid) {
+        public CategoryScriptableObject GetParentByGuid(string guid) {
             if (string.IsNullOrEmpty(guid)) return null;
             int result = -1;
             for (int i = 0; i < _categories.Count; i++) {
@@ -48,7 +48,7 @@ namespace Postive.CategorizedDB.Runtime.Categories
             if (parentGuid.Equals(childGuid)) return true;
             List<string> rootPath = new List<string>();
             do {
-                CategoryScriptableObject nextPath = GetParent(childGuid);
+                CategoryScriptableObject nextPath = GetParentByGuid(childGuid);
                 if (nextPath == null) break;
                 rootPath.Add(nextPath.ParentGUID);
                 childGuid = nextPath.ParentGUID;

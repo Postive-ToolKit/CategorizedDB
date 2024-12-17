@@ -24,9 +24,8 @@ namespace Postive.CategorizedDB.Editor.Attributes
             }
             string parentGuid = property.stringValue;
             string guid = category.GUID;
-            CategorisedDB db = category.DB;
             
-            ICategoryPathFinder pathFinder = db; 
+            ICategoryPathFinder pathFinder = category.DB; 
             if (pathFinder == null) {
                 Debug.LogError("PathFinder is null.");
                 return;

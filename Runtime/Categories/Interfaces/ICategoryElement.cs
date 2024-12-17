@@ -2,7 +2,7 @@
 {
     public interface ICategoryElement
     {
-        public CategorisedDB DB { get; }
+        public ICategoryPathFinder DB { get; }
         public string ParentGUID { get; }
         public void SetParent(string parentGuid);
     }

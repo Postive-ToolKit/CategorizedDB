@@ -3,7 +3,7 @@
 namespace Postive.CategorizedDB.Runtime.Categories
 {
     [Serializable]
-    public class CategoryElement : CategoryScriptableObject
+    public abstract class CategoryElement : CategoryScriptableObject
     {
     }
 }
