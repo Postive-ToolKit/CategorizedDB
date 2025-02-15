@@ -10,6 +10,7 @@ namespace Postive.CategorizedDB.Editor.Attributes
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            
             if (property.propertyType == SerializedPropertyType.String)
             {
                 EditorGUI.BeginProperty(position, label, property);
@@ -20,6 +21,10 @@ namespace Postive.CategorizedDB.Editor.Attributes
                 var categoryAttribute = attribute as CategoryElementSelectorAttribute;
                 if (categoryAttribute == null) {
                     EditorGUI.HelpBox(position, "This attribute can only be applied to CategoryElementSelectorAttribute fields.", MessageType.Error);
+                    return;
+                }
+                if (categoryAttribute.ElementFinder == null) {
+                    EditorGUI.HelpBox(position, "Target DB is not set. Please create DB first.", MessageType.Error);
                     return;
                 }
                 var elements = categoryAttribute.ElementFinder.Elements;
