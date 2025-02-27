@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor.TreeBuilders;
 using Postive.CategorizedDB.Runtime.Categories;
+using Postive.CategorizedDB.Runtime.Categories.Interfaces;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ClassBasedTreeViewItemBuilder = Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor.TreeBuilders.ClassBasedTreeViewItemBuilder;
 
 namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
 {
@@ -18,20 +21,27 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
             set {
                 _db = value;
                 _wasRebuildRequested = true;
-                Update();
+            }
+        }
+        public TreeViewItemBuilder ItemBuilder {
+            get => _itemBuilder;
+            set {
+                if (_itemBuilder == null) return;
+                _itemBuilder = value;
+                _itemBuilder.GetExpandedIds = () => _expandedIds;
+                _wasRebuildRequested = true;
             }
         }
         private CategorisedElementDB _db;
+        private TreeViewItemBuilder _itemBuilder = new DefaultTreeViewItemBuilder();
         private int _selectedId;
-        private Dictionary<string,int> _expandedIds = new Dictionary<string, int>();
-        private int _currentId = 0;
         private bool _wasRebuildRequested = false;
+        private Dictionary<string,int> _expandedIds = new Dictionary<string, int>();
         public CategorizeDBEditorTreeView()
         {
             style.flexGrow = 1;
-            
-            schedule.Execute(Update).Every(100);
-            BuildTree();
+            ItemBuilder = ItemBuilder;
+            itemExpandedChanged += OnExpandedChanged;
             makeItem = () => new Label() {
                 style = {
                     unityTextAlign = TextAnchor.MiddleLeft,
@@ -49,62 +59,39 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
                     OnSelectionChanged?.Invoke(DB);
                 }
             });
-            
+            BuildTree();
+            schedule.Execute(Update).Every(100);
         }
-
         private void CreateVisualElement(VisualElement element, int index) {
-            CategoryScriptableObject data = GetItemDataForIndex<CategoryScriptableObject>(index);
-            (element as Label).text = string.IsNullOrEmpty(data.Name) ? $"Empty - {data.GUID.Substring(0,5)}" : data.Name;
-            string lastParentGUID = data.ParentGUID;
-            data.OnDataChanged = () => {
+            ICategoryElement ice= GetItemDataForIndex<ICategoryElement>(index);
+            (element as Label).text = string.IsNullOrEmpty(ice.Name) ? $"Empty - {ice.GUID.Substring(0,5)}" : ice.Name;
+            if (ice.Data == null) return;
+            string lastParentGUID = ice.Data.ParentGUID;
+            ice.Data.OnDataChanged = () => {
                 RefreshItem(index);
-                _wasRebuildRequested = !lastParentGUID.Equals(data.ParentGUID);
+                _wasRebuildRequested = !lastParentGUID.Equals(ice.Data.ParentGUID);
             };
         }
         private void OnExpandedChanged(TreeViewExpansionChangedArgs changeState) {
-            CategoryScriptableObject data = GetItemDataForIndex<CategoryScriptableObject>(changeState.id);
-            if(data == null) return;
+            ICategoryElement ice = GetItemDataForIndex<ICategoryElement>(changeState.id);
+            if(ice == null) return;
             if (changeState.isExpanded) {
-                if (!_expandedIds.ContainsKey(data.GUID)) {
-                    _expandedIds.Add(data.GUID,changeState.id);
+                if (!_expandedIds.ContainsKey(ice.GUID)) {
+                    _expandedIds.Add(ice.GUID,changeState.id);
                 }
             }
-            else if (_expandedIds.ContainsKey(data.GUID)) {
-                _expandedIds.Remove(data.GUID);
+            else if (_expandedIds.ContainsKey(ice.GUID)) {
+                _expandedIds.Remove(ice.GUID);
             }
-
         }
         private void BuildTree() {
             if (_db == null) return;
-            itemExpandedChanged -= OnExpandedChanged;
             _db.OnDataChanged = RequestRebuild;
-            _currentId = 0;
-            List<TreeViewItemData<CategoryScriptableObject>> rootItems = new List<TreeViewItemData<CategoryScriptableObject>>();
-            
-            List<CategoryScriptableObject> expression = new List<CategoryScriptableObject>();
-            expression.AddRange(_db.Elements);
-            expression.AddRange(_db.Categories);
-            foreach (var data in expression.FindAll(x => string.IsNullOrEmpty(x.ParentGUID))) {
-                rootItems.Add(GetTreeViewItems(data, expression));
-            }
+            List<CategoryScriptableObject> elements = new List<CategoryScriptableObject>();
+            elements.AddRange(_db.Elements);
+            elements.AddRange(_db.Categories);
+            List<TreeViewItemData<ICategoryElement>> rootItems = _itemBuilder.BuildTreeItems(elements);
             SetRootItems(rootItems);
-            itemExpandedChanged += OnExpandedChanged;
-        }
-        private TreeViewItemData<CategoryScriptableObject> GetTreeViewItems(CategoryScriptableObject data,List<CategoryScriptableObject> expression)
-        {
-            var children = new List<CategoryScriptableObject>();
-            children.AddRange(expression.FindAll(x => x.ParentGUID.Equals(data.GUID)));
-            int currentCreatedId = _currentId;
-            if(_expandedIds.ContainsKey(data.GUID)) _expandedIds[data.GUID] = currentCreatedId;
-            _currentId++;
-            if (children.Count > 0) {
-                var root = new List<TreeViewItemData<CategoryScriptableObject>>();
-                foreach (var dataItem in children) {
-                    root.Add(GetTreeViewItems(dataItem, expression));
-                }
-                return new TreeViewItemData<CategoryScriptableObject>(currentCreatedId, data, root);
-            }
-            return new TreeViewItemData<CategoryScriptableObject>(currentCreatedId, data);
         }
         private void Update() {
             if (!_wasRebuildRequested) return;
@@ -114,16 +101,17 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
             //remove null items
             List<string> removedKeys = new List<string>();
             foreach (var pair in _expandedIds) {
-                if (GetItemDataForId<CategoryScriptableObject>(pair.Value) == null) {
+                if (GetItemDataForId<ICategoryElement>(pair.Value) == null) {
                     removedKeys.Add(pair.Key);
                 }
             }
             foreach (var key in removedKeys) {
                 _expandedIds.Remove(key);
             }
-            foreach (var id in _expandedIds.Values) {
+            List<int> keys = new List<int>(_expandedIds.Values);
+            keys.ForEach((id) => {
                 ExpandItem(id);
-            }
+            });
         }
         private void RequestRebuild() {
             _wasRebuildRequested = true;
@@ -170,14 +158,21 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
                     RequestRebuild();
                 });
             }
+            evt.menu.AppendSeparator();
+            evt.menu.AppendAction("View/Category View", (action) => {
+                ItemBuilder = new DefaultTreeViewItemBuilder();
+            });
+            evt.menu.AppendAction("View/Class View", (action) => {
+                ItemBuilder = new ClassBasedTreeViewItemBuilder();
+            });
             OnCreateContextMenu?.Invoke(evt);
         }
         private void SelectionChanged(IEnumerable<object> items) {
             var item = items.GetEnumerator();
             if (!item.MoveNext()) return;
             var data = item.Current;
-            if (data is CategoryScriptableObject categoryScriptable) {
-                _selected = categoryScriptable;
+            if (data is ICategoryElement ice) {
+                _selected = ice.Data;
                 OnSelectionChanged?.Invoke(_selected);
             }
         }

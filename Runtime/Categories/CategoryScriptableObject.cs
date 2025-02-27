@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Postive.CategorizedDB.Runtime.Categories
 {
     [Serializable]
-    public abstract class CategoryScriptableObject : ScriptableObject, ICategoryElement,ICategoryObject
+    public abstract class CategoryScriptableObject : ScriptableObject, ICategoryElement, ICategoryPath
     {
         public string GUID => _guid;
         public string Name => _name;
@@ -19,6 +19,7 @@ namespace Postive.CategorizedDB.Runtime.Categories
             get => _db;
             set => _db = value as CategorisedDB;
         }
+        public CategoryScriptableObject Data => this;
 #if ODIN_INSPECTOR
         [HideInTables]
 #endif

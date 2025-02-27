@@ -1,9 +1,13 @@
-﻿namespace Postive.CategorizedDB.Runtime.Categories.Interfaces
+﻿using UnityEngine;
+
+namespace Postive.CategorizedDB.Runtime.Categories.Interfaces
 {
     public interface ICategoryElement
     {
+        public string GUID { get; }
+        public string Name { get; }
         public ICategoryPathFinder DB { get; }
-        public string ParentGUID { get; }
-        public void SetParent(string parentGuid);
+        public CategoryScriptableObject Data { get; }
+
     }
 }

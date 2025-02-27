@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Postive.CategorizedDB.Runtime.Categories;
 using UnityEditor;
 using UnityEngine;
@@ -21,7 +22,9 @@ namespace Postive.CategorizedDB.Editor.CustomEditors
                 _categoryScriptableObject = categoryScriptableObject;
             }
 #if ODIN_INSPECTOR
-            _propertyTree = PropertyTree.Create(serializedObject.targetObject);
+            if (target != null){
+                _propertyTree = PropertyTree.Create(target);
+            }
 #endif
         }
         public override void OnInspectorGUI() {
@@ -46,6 +49,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors
         }
         public virtual void ShowOtherProperties() {
 #if ODIN_INSPECTOR
+            if (_propertyTree == null) return;
             _propertyTree.UpdateTree();
             var tree = _propertyTree.EnumerateTree(false);
             _propertyTree.BeginDraw(false);
@@ -67,6 +71,12 @@ namespace Postive.CategorizedDB.Editor.CustomEditors
                 }
             }
             serializedObject.ApplyModifiedProperties();
+#endif
+        }
+        private void OnDisable()
+        {
+#if ODIN_INSPECTOR
+            _propertyTree?.Dispose();
 #endif
         }
     }
