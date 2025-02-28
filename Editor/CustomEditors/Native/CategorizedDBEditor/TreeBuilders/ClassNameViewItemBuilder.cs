@@ -1,15 +1,22 @@
 ﻿using System.Collections.Generic;
+using Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor.Data;
 using Postive.CategorizedDB.Runtime.Categories;
 using Postive.CategorizedDB.Runtime.Categories.Interfaces;
 using UnityEngine.UIElements;
 
 namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor.TreeBuilders
 {
-    public class ClassBasedTreeViewItemBuilder : TreeViewItemBuilder
+    /// <summary>
+    /// The class name view item builder
+    /// This class builds the tree view items based on the class name
+    /// No category is created for this view
+    /// The class name is the root category
+    /// </summary>
+    public class ClassNameViewItemBuilder : TreeViewItemBuilder
     {
-        private int _currentId = 0;
         public override List<TreeViewItemData<ICategoryElement>> BuildTreeItems(List<CategoryScriptableObject> elements)
         {
+            int currentId = 0;
             List<TreeViewItemData<ICategoryElement>> rootItems = new List<TreeViewItemData<ICategoryElement>>();
             Dictionary<string,List<CategoryScriptableObject>> 
                 clsDict = new Dictionary<string,List<CategoryScriptableObject>>();
@@ -26,16 +33,16 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor.
                 if (pair.Value.Count == 0) continue;
                 List<TreeViewItemData<ICategoryElement>> classItems = new List<TreeViewItemData<ICategoryElement>>();
                 foreach (var data in pair.Value) {
-                    int currentCreatedId = _currentId++;
+                    int currentCreatedId = currentId++;
                     if (GetExpandedIds().ContainsKey(data.GUID))
                         GetExpandedIds()[data.GUID] = currentCreatedId;
                     classItems.Add(new TreeViewItemData<ICategoryElement>(currentCreatedId, data));
                 }
 
-                int currentClsId = _currentId++;
+                int currentClsId = currentId++;
                 EmptyNameCategory classCategory = new EmptyNameCategory(pair.Key);
-                if (GetExpandedIds().ContainsKey(pair.Key))
-                    GetExpandedIds()[pair.Key] = currentClsId;
+                if (GetExpandedIds().ContainsKey(classCategory.GUID))
+                    GetExpandedIds()[classCategory.GUID] = currentClsId;
                 rootItems.Add(new TreeViewItemData<ICategoryElement>(currentClsId, classCategory, classItems));
             }
             return rootItems;

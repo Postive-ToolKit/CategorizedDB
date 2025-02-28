@@ -7,7 +7,6 @@ using Postive.CategorizedDB.Runtime.Categories.Interfaces;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using ClassBasedTreeViewItemBuilder = Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor.TreeBuilders.ClassBasedTreeViewItemBuilder;
 
 namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
 {
@@ -120,6 +119,18 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
         {
             Category currentCategory = _selected as Category;
             evt.menu.AppendAction(currentCategory == null ? "Target : Root":  $"Target : {currentCategory.Name}",null);
+            // Create View Setting
+            evt.menu.AppendAction("View/Category View", (action) => {
+                ItemBuilder = new DefaultTreeViewItemBuilder();
+            });
+            evt.menu.AppendAction("View/Class Name View", (action) => {
+                ItemBuilder = new ClassNameViewItemBuilder();
+            });
+            evt.menu.AppendAction("View/Class Tree View", (action) => {
+                ItemBuilder = new ClassTreeViewItemBuilder();
+            });
+            
+            
             evt.menu.AppendSeparator();
             evt.menu.AppendAction("Add Category", (action) => {
                 _db.AddCategory(currentCategory);
@@ -158,13 +169,6 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
                     RequestRebuild();
                 });
             }
-            evt.menu.AppendSeparator();
-            evt.menu.AppendAction("View/Category View", (action) => {
-                ItemBuilder = new DefaultTreeViewItemBuilder();
-            });
-            evt.menu.AppendAction("View/Class View", (action) => {
-                ItemBuilder = new ClassBasedTreeViewItemBuilder();
-            });
             OnCreateContextMenu?.Invoke(evt);
         }
         private void SelectionChanged(IEnumerable<object> items) {
