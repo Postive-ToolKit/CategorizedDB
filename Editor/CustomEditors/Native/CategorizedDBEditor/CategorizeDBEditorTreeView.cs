@@ -14,7 +14,6 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
     {
         public Action<ContextualMenuPopulateEvent> OnCreateContextMenu;
         public Action<ScriptableObject> OnSelectionChanged;
-        private CategoryScriptableObject _selected = null;
         public CategorisedElementDB DB {
             get => _db;
             set {
@@ -33,11 +32,12 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
         }
         private CategorisedElementDB _db;
         private TreeViewItemBuilder _itemBuilder = new DefaultTreeViewItemBuilder();
-        private int _selectedId;
         private bool _wasRebuildRequested = false;
         private Dictionary<string,int> _expandedIds = new Dictionary<string, int>();
+        private readonly List<CategoryScriptableObject> _selections = new List<CategoryScriptableObject>();
         public CategorizeDBEditorTreeView()
         {
+            selectionType = SelectionType.Multiple;
             style.flexGrow = 1;
             ItemBuilder = ItemBuilder;
             itemExpandedChanged += OnExpandedChanged;
@@ -54,7 +54,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
             this.RegisterCallback<MouseDownEvent>(evt => {
                 if (evt.clickCount == 2) {
                     SetSelection(new List<int>());
-                    _selected = null;
+                    _selections.Clear();
                     OnSelectionChanged?.Invoke(DB);
                 }
             });
@@ -117,7 +117,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
         }
         private void BuildContextMenu(ContextualMenuPopulateEvent evt)
         {
-            Category currentCategory = _selected as Category;
+            Category currentCategory = _selections.Count <= 0 ? null : _selections[0] as Category;
             evt.menu.AppendAction(currentCategory == null ? "Target : Root":  $"Target : {currentCategory.Name}",null);
             // Create View Setting
             evt.menu.AppendAction("View/Category View", (action) => {
@@ -141,6 +141,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
             if(!typeof(T).IsAbstract) typesList.Add(typeof(T));
             typesList.AddRange(types);
             typesList.Sort((x,y) => String.Compare(x.Name, y.Name, StringComparison.Ordinal));
+            
             switch (typesList.Count) {
                 case 0:
                     break;
@@ -158,27 +159,36 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
                     break;
             }
             
-            if (_selected != null) {
-                evt.menu.AppendAction("Delete", (action) => {
-                    if (_selected is Category category) {
-                        _db.RemoveCategory(category);
+            if (_selections.Count > 0) {
+                string dltMenuName = _selections.Count > 1 ? "Delete All" : "Delete";
+                evt.menu.AppendAction(dltMenuName, (action) => {
+                    foreach (var cso in _selections) {
+                        if (cso is Category category) {
+                            _db.RemoveCategory(category);
+                        }
+                        else if (cso is CategoryElement element) {
+                            _db.RemoveData(element);
+                        }
                     }
-                    else if (_selected is CategoryElement element) {
-                        _db.RemoveData(element);
-                    }
+                    _selections.Clear();
                     RequestRebuild();
                 });
             }
             OnCreateContextMenu?.Invoke(evt);
         }
         private void SelectionChanged(IEnumerable<object> items) {
-            var item = items.GetEnumerator();
-            if (!item.MoveNext()) return;
-            var data = item.Current;
-            if (data is ICategoryElement ice) {
-                _selected = ice.Data;
-                OnSelectionChanged?.Invoke(_selected);
+            _selections.Clear();
+            foreach (var item in items) {
+                if (item is ICategoryElement ice) {
+                    _selections.Add(ice.Data);
+                }
             }
+            if (_selections.Count <= 0) {
+                _selections.Clear();
+                OnSelectionChanged?.Invoke(DB);
+                return;
+            }
+            OnSelectionChanged.Invoke(_selections[0]);
         }
     }
 }
