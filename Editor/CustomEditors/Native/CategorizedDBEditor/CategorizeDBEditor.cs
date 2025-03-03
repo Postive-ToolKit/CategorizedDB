@@ -7,8 +7,8 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
 {
     public abstract class CategorizeDBEditor<T> : EditorWindow where T : CategoryElement
     {
+        public CategorizeDBEditorTreeView<T> TreeView => _treeView;
         protected abstract CategorisedElementDB CurrentDB { get; }
-    
         protected CategorizeDBElementInspector _inspectorView;
         protected CategorizeDBEditorTreeView<T> _treeView;
 
@@ -44,6 +44,7 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
             
             _treeView.DB = CurrentDB;
             _treeView.OnSelectionChanged = _inspectorView.UpdateSelection;
+            _inspectorView.UpdateSelection(CurrentDB);
         }
     }
 }
