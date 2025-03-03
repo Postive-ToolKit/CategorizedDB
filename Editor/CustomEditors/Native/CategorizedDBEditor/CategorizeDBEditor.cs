@@ -9,8 +9,8 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor
     {
         public CategorizeDBEditorTreeView<T> TreeView => _treeView;
         protected abstract CategorisedElementDB CurrentDB { get; }
-        protected CategorizeDBElementInspector _inspectorView;
-        protected CategorizeDBEditorTreeView<T> _treeView;
+        private CategorizeDBElementInspector _inspectorView;
+        private CategorizeDBEditorTreeView<T> _treeView;
 
         public void CreateGUI()
         {
