@@ -28,6 +28,9 @@ namespace Postive.CategorizedDB.Editor.Attributes
                     return;
                 }
                 var elements = categoryAttribute.ElementFinder.Elements;
+                if (categoryAttribute.ElementType != null) {
+                    elements = elements.FindAll(x => x.GetType() == categoryAttribute.ElementType);
+                }
 
                 tagList.Add("NONE");
                 foreach (var element in elements) {
