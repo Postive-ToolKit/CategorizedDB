@@ -25,19 +25,20 @@ namespace Postive.CategorizedDB.Editor.CustomEditors.Native.CategorizedDBEditor.
                     _classTypes.Add(type);
                 }
             }
+            Type rootType = _classTypes[0];
+            while (rootType.BaseType != typeof(CategoryElement)) {
+                rootType = rootType.BaseType;
+            }
+            if(rootType == null) {
+                throw new Exception("Root type not found");
+            }
+            _rootType = rootType;
             foreach (var type in _classTypes) {
-                if (type.BaseType == typeof(CategoryElement)) {
-                    _rootType = type;
-                    continue;
-                }
                 if (type.BaseType == null) continue;
                 if (!_classTree.ContainsKey(type.BaseType)) {
                     _classTree.Add(type.BaseType, new List<Type>());
                 }
                 _classTree[type.BaseType].Add(type);
-            }
-            if(_rootType == null) {
-                throw new Exception("Root type not found");
             }
         }
         public override List<TreeViewItemData<ICategoryElement>> BuildTreeItems(List<CategoryScriptableObject> elements)
