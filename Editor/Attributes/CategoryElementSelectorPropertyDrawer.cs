@@ -29,7 +29,7 @@ namespace Postive.CategorizedDB.Editor.Attributes
                 }
                 var elements = categoryAttribute.ElementFinder.Elements;
                 if (categoryAttribute.ElementType != null) {
-                    elements = elements.FindAll(x => x.GetType() == categoryAttribute.ElementType);
+                    elements = elements.FindAll(x => x.GetType().IsSubclassOf(categoryAttribute.ElementType));
                 }
 
                 tagList.Add("NONE");
